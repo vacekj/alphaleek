@@ -4,20 +4,14 @@ import { Session } from "next-auth";
 import { Octokit } from "@octokit/rest";
 import { createTokenAuth } from "@octokit/auth-token";
 
-interface Props {
-  sesh:
-    | (Session & {
-        token: { accessToken: string };
-      })
-    | null;
-}
+interface Props {}
 
 export default function Component(props: Props) {
   return (
     <div>
       <div>
         {props.sesh ? (
-          <div>{props.sesh.token.accessToken}</div>
+          <pre>{JSON.stringify(props, null, 4)}</pre>
         ) : (
           <button
             onClick={() => {
@@ -48,48 +42,59 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
     auth: authentication.token,
   });
 
-  const repos = await gh.repos.listForAuthenticatedUser();
+  const user = await gh.users.getAuthenticated();
+  const allrepos = (
+    await gh.repos.listForAuthenticatedUser({
+      per_page: 100,
+    })
+  ).data;
+  const repos = allrepos.filter((r) => r.owner.login === user.data.login);
 
-  const totalStars = repos.data.reduce((acc, repo) => {
-    return repo.stargazers_count;
+  const totalStars = repos.reduce((acc, repo) => {
+    return acc + repo.stargazers_count;
   }, 0);
 
   const languages = (
     await Promise.all(
-      repos.data.map(async (r) => {
+      repos.map(async (r) => {
         return gh.repos.listLanguages({
           owner: r.owner.login,
           repo: r.name,
         });
       })
     )
-  ).map((r) => {
-    return r.data;
-  });
-
-  const user = await gh.users.getAuthenticated();
-  const commits = await Promise.all(
-    repos.data.map(async (r) => {
-      try {
-        return await gh.repos.listCommits({
-          owner: user.data.login,
-          repo: r.name,
-          author: user.data.login,
-        });
-      } catch (e) {
-        return {};
-      }
+  )
+    .map((r) => {
+      return r.data;
     })
-  );
+    .filter((d) => Object.keys(d).length === 0);
+
+  const commits = (
+    await Promise.all(
+      repos.map(async (r) => {
+        try {
+          return await gh.repos.listCommits({
+            owner: user.data.login,
+            repo: r.name,
+            author: user.data.login,
+          });
+        } catch (e) {
+          return { status: false, data: {} };
+        }
+      })
+    )
+  )
+    .filter((c) => c.status)
+    .map((c) => c.data)
+    .flat();
 
   return {
     props: {
-      test: true,
       sesh: session,
-      repos: repos.data,
+      repos: repos,
       languages,
       totalStars,
-      commits,
+      commits: commits,
     },
   };
 }
