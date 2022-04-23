@@ -1,17 +1,20 @@
-import { useSession, signIn, signOut, getSession } from "next-auth/react";
+import { signIn, getSession } from "next-auth/react";
 import { GetServerSidePropsContext } from "next";
-import { Session } from "next-auth";
 import { Octokit } from "@octokit/rest";
 import { createTokenAuth } from "@octokit/auth-token";
 
-interface Props {}
+interface Props {
+  sesh: any;
+}
 
 export default function Component(props: Props) {
   return (
     <div>
       <div>
         {props.sesh ? (
-          <pre>{JSON.stringify(props, null, 4)}</pre>
+          <>
+            <pre>{JSON.stringify(props, null, 4)}</pre>
+          </>
         ) : (
           <button
             onClick={() => {
