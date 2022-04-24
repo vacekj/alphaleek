@@ -2,17 +2,37 @@ import { signIn, getSession } from "next-auth/react";
 import { GetServerSidePropsContext } from "next";
 import { Octokit } from "@octokit/rest";
 import { createTokenAuth } from "@octokit/auth-token";
+import abi from "../nftContractAbi";
+import { useApiContract } from "react-moralis";
+import { useState } from "react";
 
 interface Props {
   sesh: any;
+  user: any;
 }
 
 export default function Component(props: Props) {
+  const [address, setAddress] = useState("");
+
   return (
     <div>
+      <input value={address} onChange={(e) => setAddress(e.target.value)} />
       <div>
         {props.sesh ? (
           <>
+            <button
+              onClick={async () => {
+                fetch("/api/upload", {
+                  method: "POST",
+                  body: JSON.stringify({
+                    minter: address,
+                    github_username: props.user.login,
+                  }),
+                });
+              }}
+            >
+              Mint
+            </button>
             <pre>{JSON.stringify(props, null, 4)}</pre>
           </>
         ) : (
@@ -91,8 +111,10 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
     .map((c) => c.data)
     .flat();
 
+  /* Mashallah */
   return {
     props: {
+      user: user.data,
       sesh: session,
       repos: repos,
       languages,
