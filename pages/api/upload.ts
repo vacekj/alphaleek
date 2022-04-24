@@ -41,13 +41,6 @@ async function storeNft(
 const PRIVATE_KEY = process.env.NEXT_MINTER_PRIVATE_KEY;
 assert(Boolean(PRIVATE_KEY), "Private key not provided");
 
-async function mintNft(
-  address_to: string,
-  tokenUri: string
-): Promise<Transaction> {
-  return;
-}
-
 type Request = {
   user: {
     address: string;
@@ -76,13 +69,10 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
   try {
     const metadata = await storeNft(body.image, body.user);
-    const provider = new JsonRpcProvider(
-      "https://rpc-mumbai.matic.today",
-      "any"
-    );
+    const provider = new JsonRpcProvider(network.chainParams.rpcUrls[0], "any");
     const minterWallet = new Wallet(PRIVATE_KEY!, provider);
     const nftContract = new ethers.Contract(
-      "0xa43a157dc95D0e467042C0548512fa6Da36aE19f",
+      network.contract!,
       new Interface(abi),
       minterWallet
     );
