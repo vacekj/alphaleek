@@ -40,8 +40,10 @@ export default function Component(props: Props) {
         <>
           <NFTCard
             user={props.user}
+            // @ts-ignore
             repos={props.repos}
-            stars={props.stars}
+            // @ts-ignore
+            stars={props.stars} // @ts-ignore
             languages={props.languages}
           />
           <button

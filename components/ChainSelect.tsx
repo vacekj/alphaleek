@@ -7,12 +7,14 @@ export function useCurrentChain() {
   const [currentChain, setCurrentChain] = useState(chains[0]);
 
   useEffect(() => {
+    // @ts-ignore
     window.ethereum.request({ method: "eth_chainId" }).then((id) => {
       setCurrentChain(chains.find((p) => p.chainParams.chainId === id)!);
     });
   }, []);
 
   if (typeof window !== "undefined") {
+    // @ts-ignore
     window.ethereum.on("chainChanged", (chainId: string) =>
       setCurrentChain(chains.find((p) => p.chainParams.chainId === chainId)!)
     );
@@ -86,7 +88,6 @@ export default function Example() {
     <Listbox
       value={selected}
       onChange={async (e) => {
-        setSelected(e);
         try {
           // @ts-ignore
           await window.ethereum.request({
