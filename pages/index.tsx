@@ -5,6 +5,7 @@ import { createTokenAuth } from "@octokit/auth-token";
 import abi from "../nftContractAbi";
 import { useApiContract } from "react-moralis";
 import { useState } from "react";
+import { ConnectButton } from "web3uikit";
 
 interface Props {
   sesh: any;
@@ -44,6 +45,7 @@ export default function Component(props: Props) {
             Sign in
           </button>
         )}
+        <ConnectButton />
       </div>
     </div>
   );
