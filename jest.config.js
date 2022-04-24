@@ -6,4 +6,11 @@ module.exports = {
     "^.+\\.[tj]s$": "ts-jest",
   },
   transformIgnorePatterns: ["^.+\\.js$"],
+  typescript: {
+    // !! WARN !!
+    // Dangerously allow production builds to successfully complete even if
+    // your project has type errors.
+    // !! WARN !!
+    ignoreBuildErrors: true,
+  },
 };
