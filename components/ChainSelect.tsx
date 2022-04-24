@@ -88,6 +88,7 @@ export default function Example() {
   return (
     <Listbox
       value={selected}
+      // @ts-ignore
       onChange={async (e) => {
         try {
           // @ts-ignore
