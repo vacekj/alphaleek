@@ -59,7 +59,6 @@ export const chains = [
 
 export function useCurrentChain() {
   const [currentChain, setCurrentChain] = useState(chains[0]);
-
   useEffect(() => {
     // @ts-ignore
     window.ethereum.request({ method: "eth_chainId" }).then((id) => {
