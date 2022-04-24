@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { NFTStorage, File } from "nft.storage";
+// @ts-ignore
+import { NFTStorage } from "nft.storage/dist/bundle.esm.min.js";
 import { ethers, Wallet, ContractInterface, Transaction } from "ethers";
 import assert from "assert";
 import { Interface } from "@ethersproject/abi";
@@ -32,7 +33,6 @@ assert(Boolean(PRIVATE_KEY), "Private key not provided");
 const provider = new JsonRpcProvider("https://rpc-mumbai.matic.today", 137);
 const minterWallet = new Wallet(PRIVATE_KEY!, provider);
 const nftContract = new ethers.Contract("", new Interface(abi), minterWallet);
-
 async function mintNft(
   address_to: string,
   tokenUri: string
