@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 // @ts-ignore
-import { NFTStorage } from "nft.storage/dist/bundle.esm.min.js";
+import { NFTStorage } from "nft.storage";
 import { ethers, Wallet, ContractInterface, Transaction } from "ethers";
 import assert from "assert";
 import { Interface } from "@ethersproject/abi";
@@ -12,14 +12,13 @@ assert(Boolean(API_KEY), "NFT Storage key not provided");
 const client = new NFTStorage({ token: API_KEY! });
 
 async function storeNft(image: string, minterAddress: string) {
-  const buff = Buffer.from(image, "base64url");
+  const blob = await fetch(image).then((res) => res.blob());
 
   const nft = {
-    image: new File([buff], minterAddress + ".png", {
-      type: "image/png",
-    }),
+    image: blob,
     name: "AlphaLeek Badge",
     description: "",
+
     properties: {
       recipient: minterAddress,
     },
@@ -30,9 +29,13 @@ async function storeNft(image: string, minterAddress: string) {
 
 const PRIVATE_KEY = process.env.NEXT_MINTER_PRIVATE_KEY;
 assert(Boolean(PRIVATE_KEY), "Private key not provided");
-const provider = new JsonRpcProvider("https://rpc-mumbai.matic.today", 137);
+const provider = new JsonRpcProvider("https://rpc-mumbai.matic.today", "any");
 const minterWallet = new Wallet(PRIVATE_KEY!, provider);
-const nftContract = new ethers.Contract("", new Interface(abi), minterWallet);
+const nftContract = new ethers.Contract(
+  "0xa43a157dc95D0e467042C0548512fa6Da36aE19f",
+  new Interface(abi),
+  minterWallet
+);
 
 async function mintNft(
   address_to: string,
@@ -52,6 +55,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
   if (!body.minter || !body.image) {
     return res.status(400).json({
       error: "Bad request",
+      body: req.body,
     });
   }
 
@@ -61,6 +65,8 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
     return res.status(201).json({ metadata, hash: transaction.hash });
   } catch (e) {
-    return res.status(500).json(e);
+    return res
+      .status(500)
+      .json(JSON.stringify(e, Object.getOwnPropertyNames(e)));
   }
 };

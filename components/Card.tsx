@@ -6,18 +6,22 @@ interface NFTCardProps {
 }
 
 export default function NFTCard(props: NFTCardProps) {
+  const totalBytes = props.languages.reduce((acc, l) => (acc += l[1]), 0);
+  const bestRepo = props.repos.reduce((best, curr) => {
+    return curr.stargazers_count > best.stargazers_count ? curr : best;
+  }, props.repos[0]);
   return (
-    <div className="h-96 w-96 bg-slate-200 p-4">
+    <div className="h-96 w-96 shadow-xl bg-white p-4 rounded-xl" id={"nftcard"}>
       <div className="flex flex-col">
         <div className="mb-4 flex flex-row items-center space-x-2">
           <img
-            className="h-14 w-14 rounded-full border-2 border-white shadow-lg"
+            className="h-16 w-16 rounded-full border-2 border-white shadow-lg"
             src={props.user.avatar_url}
             alt="Profile picture"
           />
           <div className="flex h-full flex-col">
-            <h1 className="font-bold">@{props.user.login}</h1>
-            <div className="flex flex-row items-center space-x-1">
+            <h1 className="font-bold text-2xl">@{props.user.login}</h1>
+            <div className="flex flex-row items-center space-x-3">
               <div className="flex flex-row items-center space-x-0.5">
                 <div className="text-gray-400">
                   <svg
@@ -45,6 +49,7 @@ export default function NFTCard(props: NFTCardProps) {
                 </div>
                 <h2>{props.stars}</h2>
               </div>
+
               <div className="flex flex-row items-center space-x-0.5">
                 <div className="text-gray-400">
                   <svg
@@ -66,22 +71,31 @@ export default function NFTCard(props: NFTCardProps) {
           </div>
         </div>
         <div className="mb-4 h-0.5 bg-gray-300"></div>
-        <div className="flex flex-col space-y-2">
+        <div className="flex flex-col space-y-4">
           <div>
-            <h2 className="text-sm text-gray-500">Favorite language</h2>
-            <p className="font-bold">{props.languages[0][0]}</p>
+            <h3 className="text-lg leading-6 font-medium text-gray-900">
+              Most used language
+            </h3>
+            <dd className="mt-1 text-3xl font-semibold text-gray-900">
+              {props.languages[0][0]}
+            </dd>
+            <dt className="text-sm font-medium text-gray-500 truncate">
+              {" "}
+              {((props.languages[0][1] / totalBytes) * 100).toFixed(0)}% of all
+              code
+            </dt>
           </div>
+
           <div>
-            <h2 className="text-sm text-gray-500">Most popular repository</h2>
-            <p className="font-bold">
-              {
-                props.repos.reduce((best, curr) => {
-                  return curr.stargazers_count > best.stargazers_count
-                    ? curr
-                    : best;
-                }, props.repos[0]).name
-              }
-            </p>
+            <h3 className="text-lg leading-6 font-medium text-gray-900">
+              Most loved repo
+            </h3>
+            <dd className="mt-1 text-3xl font-semibold text-gray-900">
+              {bestRepo.name}
+            </dd>
+            <dt className="text-sm font-medium text-gray-500 truncate">
+              {bestRepo.stargazers_count} stars
+            </dt>
           </div>
         </div>
       </div>

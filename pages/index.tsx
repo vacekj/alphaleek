@@ -1,12 +1,18 @@
-import { signIn, getSession } from "next-auth/react";
+import { signIn, getSession, signOut } from "next-auth/react";
 import { GetServerSidePropsContext } from "next";
 import { Octokit } from "@octokit/rest";
 import { createTokenAuth } from "@octokit/auth-token";
 import abi from "../nftContractAbi";
-import { useApiContract } from "react-moralis";
+import { useApiContract, useMoralis } from "react-moralis";
 import { useState } from "react";
-import { ConnectButton } from "web3uikit";
+import { Button, ConnectButton } from "web3uikit";
 import NFTCard from "../components/Card";
+import dynamic from "next/dynamic";
+import html2canvas from "html2canvas";
+
+const ChainSelect = dynamic(() => import("../components/ChainSelect"), {
+  ssr: false,
+});
 
 interface Props {
   sesh: any;
@@ -14,47 +20,75 @@ interface Props {
 }
 
 export default function Component(props: Props) {
-  const [address, setAddress] = useState("");
+  const { user } = useMoralis();
 
   return (
-    <div>
-      <input value={address} onChange={(e) => setAddress(e.target.value)} />
-      <div>
-        {props.sesh ? (
-          <>
-            <NFTCard
-              user={props.user}
-              repos={props.repos}
-              stars={props.stars}
-              languages={props.languages}
-            />
-            <button
-              onClick={async () => {
-                fetch("/api/upload", {
-                  method: "POST",
-                  body: JSON.stringify({
-                    minter: address,
-                    github_username: props.user.login,
-                  }),
-                });
-              }}
-            >
-              Mint
-            </button>
-            <pre>{JSON.stringify(props, null, 4)}</pre>
-          </>
-        ) : (
+    <main
+      className={`mx-auto max-w-xl flex flex-col justify-center items-center bg-slate-50 mt-10 rounded-xl`}
+    >
+      <div
+        className={"mt-5 w-full flex justify-between items-center px-5 mb-10"}
+      >
+        <ChainSelect />
+        <ConnectButton />
+      </div>
+      {props.sesh ? (
+        <>
+          <NFTCard
+            user={props.user}
+            repos={props.repos}
+            stars={props.stars}
+            languages={props.languages}
+          />
           <button
+            type="button"
+            className="mt-10 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            onClick={async () => {
+              const canvas = await html2canvas(
+                document.querySelector("#nftcard")!
+              );
+
+              fetch("/api/upload", {
+                method: "POST",
+                body: JSON.stringify({
+                  minter: user!.attributes.ethAddress,
+                  github_username: props.user.login,
+                  image: canvas.toDataURL(),
+                }),
+                headers: {
+                  Accept: "application/json",
+                  "Content-Type": "application/json",
+                },
+              }).then();
+            }}
+          >
+            Mint your Developer Card
+          </button>
+          <button
+            type="button"
+            className="my-5 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            onClick={() => signOut()}
+          >
+            Sign out of GitHub
+          </button>
+        </>
+      ) : (
+        <>
+          <div className={`p-5 text-center text-xl `}>
+            Welcome hacker. Connect your GitHub, show your shadowy super skills
+            and claim an on-chain proof of your prowess
+          </div>
+          <button
+            className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 mb-5"
             onClick={() => {
               signIn("github");
             }}
           >
-            Sign in
+            Sign in with Github
           </button>
-        )}
-        <ConnectButton />
-      </div>
-    </div>
+        </>
+      )}
+    </main>
   );
 }
 
