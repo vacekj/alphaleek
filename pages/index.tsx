@@ -91,7 +91,7 @@ export default function Component(props: Props) {
         <>
           <div className={`p-5 text-center text-xl `}>
             Welcome hacker. Connect your GitHub, show your shadowy super skills
-            and claim an on-chain proof of your prowess
+            and claim an on-chain proof of your developer prowess.
           </div>
           <button
             className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 mb-5"
