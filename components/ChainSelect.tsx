@@ -4,25 +4,6 @@ import { Listbox } from "@headlessui/react";
 import { CheckIcon, SelectorIcon } from "@heroicons/react/solid";
 import { useMoralisWeb3Api } from "react-moralis";
 
-export function useCurrentChain() {
-  const [currentChain, setCurrentChain] = useState(chains[0]);
-
-  useEffect(() => {
-    // @ts-ignore
-    window.ethereum.request({ method: "eth_chainId" }).then((id) => {
-      setCurrentChain(chains.find((p) => p.chainParams.chainId === id)!);
-    });
-  }, []);
-
-  if (typeof window !== "undefined") {
-    // @ts-ignore
-    window.ethereum.on("chainChanged", (chainId: string) =>
-      setCurrentChain(chains.find((p) => p.chainParams.chainId === chainId)!)
-    );
-  }
-
-  return currentChain;
-}
 
 export const chains = [
   {
@@ -78,6 +59,27 @@ export const chains = [
   },
 ];
 
+export function useCurrentChain() {
+  const [currentChain, setCurrentChain] = useState(chains[0]);
+
+  useEffect(() => {
+    // @ts-ignore
+    window.ethereum.request({ method: "eth_chainId" }).then((id) => {
+      setCurrentChain(chains.find((p) => p.chainParams.chainId === id)!);
+    });
+  }, []);
+
+  if (typeof window !== "undefined") {
+    // @ts-ignore
+    window.ethereum.on("chainChanged", (chainId: string) =>
+      setCurrentChain(chains.find((p) => p.chainParams.chainId === chainId)!)
+    );
+  }
+
+  return currentChain;
+}
+
+
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
 }
@@ -120,11 +122,11 @@ export default function Example() {
             <Listbox.Button className="relative w-full bg-white border border-gray-300 rounded-md shadow-sm pl-3 pr-10 py-2 text-left cursor-default focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
               <span className="flex items-center">
                 <img
-                  src={selected.avatar}
+                  src={selected?.avatar}
                   alt=""
                   className="flex-shrink-0 h-6 w-6 rounded-full"
                 />
-                <span className="ml-3 block truncate">{selected.name}</span>
+                <span className="ml-3 block truncate">{selected?.name}</span>
               </span>
               <span className="ml-3 absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
                 <SelectorIcon
@@ -150,7 +152,7 @@ export default function Example() {
                     <>
                       <div className="flex items-center">
                         <img
-                          src={person.avatar}
+                          src={person?.avatar}
                           alt=""
                           className="flex-shrink-0 h-6 w-6 rounded-full"
                         />

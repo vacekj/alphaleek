@@ -16,7 +16,7 @@ export default function NFTCard(props: NFTCardProps) {
         <div className="mb-4 flex flex-row items-center space-x-2">
           <img
             className="h-16 w-16 rounded-full border-2 border-white shadow-lg"
-            src={props.user.avatar_url}
+            src={props?.user?.avatar_url}
             alt="Profile picture"
           />
           <div className="flex h-full flex-col">
