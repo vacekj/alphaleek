@@ -9,6 +9,7 @@ import { Button, ConnectButton } from "web3uikit";
 import NFTCard from "../components/Card";
 import dynamic from "next/dynamic";
 import html2canvas from "html2canvas";
+import { useCurrentChain } from "../components/ChainSelect";
 
 const ChainSelect = dynamic(() => import("../components/ChainSelect"), {
   ssr: false,
@@ -21,6 +22,9 @@ interface Props {
 
 export default function Component(props: Props) {
   const { user } = useMoralis();
+  const [buttonText, setButtonText] = useState("Mint your Developer Badge");
+  const [transactionHash, setTransactionHash] = useState("");
+  const chain = useCurrentChain();
 
   return (
     <main
@@ -42,28 +46,39 @@ export default function Component(props: Props) {
           />
           <button
             type="button"
+            disabled={Boolean(transactionHash)}
             className="mt-10 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             onClick={async () => {
               const canvas = await html2canvas(
                 document.querySelector("#nftcard")!
               );
-
-              fetch("/api/upload", {
+              setButtonText("Minting...");
+              const res = await fetch("/api/upload", {
                 method: "POST",
                 body: JSON.stringify({
-                  minter: user!.attributes.ethAddress,
-                  github_username: props.user.login,
+                  user: { ...props.user, address: user!.attributes.ethAddress },
                   image: canvas.toDataURL(),
                 }),
                 headers: {
                   Accept: "application/json",
                   "Content-Type": "application/json",
                 },
-              }).then();
+              }).then((r) => r.json());
+
+              setTransactionHash(res.hash);
+              setButtonText("Minted sucessfully!");
             }}
           >
-            Mint your Developer Card
+            {buttonText}
           </button>
+          {transactionHash && (
+            <a
+              className={"font-medium text-lg pt-3"}
+              href={`${chain.chainParams.blockExplorerUrls[0]}/tx/${transactionHash}`}
+            >
+              View Transaction on Block Explorer
+            </a>
+          )}
           <button
             type="button"
             className="my-5 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"

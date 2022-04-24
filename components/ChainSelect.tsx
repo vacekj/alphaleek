@@ -3,7 +3,25 @@ import { Listbox } from "@headlessui/react";
 import { CheckIcon, SelectorIcon } from "@heroicons/react/solid";
 import { useMoralisWeb3Api } from "react-moralis";
 
-const chains = [
+export function useCurrentChain() {
+  const [currentChain, setCurrentChain] = useState(chains[0]);
+
+  useEffect(() => {
+    window.ethereum.request({ method: "eth_chainId" }).then((id) => {
+      setCurrentChain(chains.find((p) => p.chainParams.chainId === id)!);
+    });
+  }, []);
+
+  if (typeof window !== "undefined") {
+    window.ethereum.on("chainChanged", (chainId: string) =>
+      setCurrentChain(chains.find((p) => p.chainParams.chainId === chainId)!)
+    );
+  }
+
+  return currentChain;
+}
+
+export const chains = [
   {
     id: 1,
     name: "Polygon",
@@ -19,6 +37,7 @@ const chains = [
       },
       blockExplorerUrls: ["https://explorer-mumbai.maticvigil.com"],
     },
+    contract: "0xa43a157dc95D0e467042C0548512fa6Da36aE19f",
   },
   {
     id: 2,
@@ -61,17 +80,7 @@ function classNames(...classes: string[]) {
 }
 
 export default function Example() {
-  const [selected, setSelected] = useState(chains[0]);
-
-  useEffect(() => {
-    window.ethereum.request({ method: "eth_chainId" }).then((id) => {
-      setSelected(chains.find((p) => p.chainParams.chainId === id)!);
-    });
-  }, []);
-
-  window.ethereum.on("chainChanged", (chainId: string) =>
-    setSelected(chains.find((p) => p.chainParams.chainId === chainId)!)
-  );
+  const selected = useCurrentChain();
 
   return (
     <Listbox
