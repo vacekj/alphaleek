@@ -5,6 +5,7 @@ import { createTokenAuth } from "@octokit/auth-token";
 import abi from "../nftContractAbi";
 import { useApiContract } from "react-moralis";
 import { useState } from "react";
+import NFTCard from "../components/Card";
 
 interface Props {
   sesh: any;
@@ -20,6 +21,12 @@ export default function Component(props: Props) {
       <div>
         {props.sesh ? (
           <>
+            <NFTCard
+              user={props.user}
+              repos={props.repos}
+              stars={props.stars}
+              languages={props.languages}
+            />
             <button
               onClick={async () => {
                 fetch("/api/upload", {
@@ -90,7 +97,20 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
     .map((r) => {
       return r.data;
     })
-    .filter((d) => Object.keys(d).length === 0);
+    .reduce((acc, curr) => {
+      for (const currKey in curr) {
+        if (!acc.hasOwnProperty(currKey)) {
+          acc[currKey] = curr[currKey];
+        } else {
+          acc[currKey] += curr[currKey];
+        }
+      }
+      return acc;
+    });
+
+  let entries = Object.entries(languages);
+
+  let langs = entries.sort((a, b) => b[1] - a[1]);
 
   const commits = (
     await Promise.all(
@@ -117,8 +137,8 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
       user: user.data,
       sesh: session,
       repos: repos,
-      languages,
-      totalStars,
+      languages: langs,
+      stars: totalStars,
       commits: commits,
     },
   };

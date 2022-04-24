@@ -33,6 +33,7 @@ assert(Boolean(PRIVATE_KEY), "Private key not provided");
 const provider = new JsonRpcProvider("https://rpc-mumbai.matic.today", 137);
 const minterWallet = new Wallet(PRIVATE_KEY!, provider);
 const nftContract = new ethers.Contract("", new Interface(abi), minterWallet);
+
 async function mintNft(
   address_to: string,
   tokenUri: string
