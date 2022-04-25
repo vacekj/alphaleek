@@ -111,7 +111,6 @@ export default function Example() {
         }
       }}
     >
-      {/* // @ts-ignore */}
       {({ open }) => (
         <>
           <div className="mt-1 relative w-48">
